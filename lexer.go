@@ -30,8 +30,11 @@ func errorPrint(fmt string, args ...string) {
 
 func errorAt(pos int, msg string) {
 	log.Printf("%s", user_input)
-	log.Printf("%*s", pos, " ")
-	log.Fatalf("^ %s\n", msg)
+	space := ""
+	for i := 0; i < pos; i++ {
+		space += " "
+	}
+	log.Fatalf("%s^ %s\n", space, msg)
 }
 
 func tokenize() {
