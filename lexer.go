@@ -23,9 +23,8 @@ var (
 	tokens     [100]Token
 )
 
-func errorPrint(fmt string, args ...string) {
-	//TODO:
-	log.Fatalf(fmt+"\n", args)
+func errorPrint(fmt string, args ...interface{}) {
+	log.Fatalf(fmt+"\n", args...)
 }
 
 func errorAt(pos int, msg string) {
