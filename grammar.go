@@ -16,15 +16,25 @@ func expr() *Node {
 
 func mul() *Node {
 	//fmt.Println("mul")
-	node := term()
+	node := unary()
 	for {
 		if consume('*') {
-			node = newNode('*', node, term())
+			node = newNode('*', node, unary())
 		} else if consume('/') {
-			node = newNode('/', node, term())
+			node = newNode('/', node, unary())
 		} else {
 			return node
 		}
+	}
+}
+
+func unary() *Node {
+	if consume('+') {
+		return term()
+	} else if consume('-') {
+		return newNode('-', newNodeNum(0), term())
+	} else {
+		return term()
 	}
 }
 
