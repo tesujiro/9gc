@@ -9,6 +9,10 @@ import (
 const (
 	TK_NUM = 256 + iota
 	TK_EOF
+	TK_EQ // ==
+	TK_NE // !=
+	TK_LE // <=
+	TK_GE // >=
 )
 
 type Token struct {
