@@ -22,36 +22,11 @@ type Token struct {
 	loc   int    // location
 }
 
-const (
-	ND_NUM = 256 + iota
-	ND_EQ
-	ND_NE
-	ND_LE
-	ND_GE
+var (
+	user_input string
+	tokens     [100]Token
+	pos        int
 )
-
-type Node struct {
-	ty  int   // type of node
-	lhs *Node // left-hand side
-	rhs *Node // reft-hand side
-	val int   // value when ty is ND_NUM
-}
-
-func newNode(ty int, lhs, rhs *Node) *Node {
-	return &Node{
-		ty:  ty,
-		lhs: lhs,
-		rhs: rhs,
-	}
-}
-
-func newNodeNum(val int) *Node {
-	//fmt.Printf("newNodeNum(%v)\n", val)
-	return &Node{
-		ty:  ND_NUM,
-		val: val,
-	}
-}
 
 func consume(ty int) bool {
 	if tokens[pos].ty != ty {
@@ -60,12 +35,6 @@ func consume(ty int) bool {
 	pos++
 	return true
 }
-
-var (
-	user_input string
-	tokens     [100]Token
-	pos        int
-)
 
 func errorPrint(fmt string, args ...interface{}) {
 	log.Fatalf(fmt+"\n", args...)
