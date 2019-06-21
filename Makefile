@@ -4,5 +4,7 @@
 test: 9gc
 	./test.sh
 
+
+
 clean:
-	-rm tmp* 2>/dev/null
+	-rm -f tmp* 2>/dev/null

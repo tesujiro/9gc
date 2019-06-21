@@ -12,6 +12,30 @@ func gen(node *Node) {
 	fmt.Printf("  pop rdi\n")
 	fmt.Printf("  pop rax\n")
 	switch node.ty {
+	case ND_EQ:
+		fmt.Printf("  cmp rax, rdi\n")
+		fmt.Printf("  sete al\n")
+		fmt.Printf("  movzb rax,al\n")
+	case ND_NE:
+		fmt.Printf("  cmp rax, rdi\n")
+		fmt.Printf("  setne al\n")
+		fmt.Printf("  movzb rax,al\n")
+	case '<':
+		fmt.Printf("  cmp rax, rdi\n")
+		fmt.Printf("  setl al\n")
+		fmt.Printf("  movzb rax,al\n")
+	case ND_LE:
+		fmt.Printf("  cmp rax, rdi\n")
+		fmt.Printf("  setle al\n")
+		fmt.Printf("  movzb rax,al\n")
+	case '>':
+		fmt.Printf("  cmp rdi, rax\n")
+		fmt.Printf("  setl al\n")
+		fmt.Printf("  movzb rax,al\n")
+	case ND_GE:
+		fmt.Printf("  cmp rdi, rax\n")
+		fmt.Printf("  setle al\n")
+		fmt.Printf("  movzb rax,al\n")
 	case '+':
 		fmt.Printf("  add rax, rdi\n")
 	case '-':

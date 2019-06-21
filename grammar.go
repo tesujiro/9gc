@@ -1,6 +1,41 @@
 package main
 
 func expr() *Node {
+	return equality()
+}
+
+func equality() *Node {
+	node := relational()
+	for {
+		if consume(TK_EQ) {
+			node = newNode(ND_EQ, node, relational())
+		} else if consume(TK_NE) {
+			node = newNode(ND_NE, node, relational())
+		} else {
+			return node
+		}
+	}
+}
+
+func relational() *Node {
+	node := add()
+	for {
+		switch {
+		case consume('<'):
+			node = newNode('<', node, add())
+		case consume(TK_LE):
+			node = newNode(ND_LE, node, add())
+		case consume('>'):
+			node = newNode('>', node, add())
+		case consume(TK_GE):
+			node = newNode(ND_GE, node, add())
+		default:
+			return node
+		}
+	}
+}
+
+func add() *Node {
 	//fmt.Println("expr")
 	node := mul()
 	for {

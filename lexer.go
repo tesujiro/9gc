@@ -24,6 +24,10 @@ type Token struct {
 
 const (
 	ND_NUM = 256 + iota
+	ND_EQ
+	ND_NE
+	ND_LE
+	ND_GE
 )
 
 type Node struct {
@@ -79,7 +83,17 @@ func errorAt(pos int, msg string) {
 func tokenize() {
 	i := 0
 	p := 0
-	opList := []rune{'+', '-', '*', '/', '(', ')'}
+	opList := []rune{'<', '>', '+', '-', '*', '/', '(', ')'}
+	multiCharOpList := []struct {
+		ope string
+		tok int
+	}{
+		{"==", TK_EQ},
+		{"!=", TK_NE},
+		{"<=", TK_LE},
+		{">=", TK_GE},
+	}
+
 loop:
 	for p < len(user_input) {
 		r := rune(user_input[p])
@@ -88,6 +102,20 @@ loop:
 			//fmt.Println("SPACE")
 			continue
 		}
+		for _, op := range multiCharOpList {
+			if p+len(op.ope) > len(user_input) {
+				continue
+			}
+			s := user_input[p : p+len(op.ope)]
+			if s == op.ope {
+				tokens[i].ty = op.tok
+				tokens[i].input = s
+				tokens[i].loc = p
+				i++
+				p += len(op.ope)
+				continue loop
+			}
+		}
 		for _, ch := range opList {
 			if r == ch {
 				tokens[i].ty = int(user_input[p])
@@ -95,7 +123,6 @@ loop:
 				tokens[i].loc = p
 				i++
 				p++
-				//fmt.Println("PLUS MINUS")
 				continue loop
 			}
 		}
