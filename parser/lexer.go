@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 	"unicode"
@@ -8,6 +9,7 @@ import (
 
 const (
 	TK_NUM = 256 + iota
+	TK_IDENT
 	TK_EOF
 	TK_EQ // ==
 	TK_NE // !=
@@ -44,10 +46,6 @@ func consume(ty int) bool {
 	return true
 }
 
-func errorPrint(fmt string, args ...interface{}) {
-	log.Fatalf(fmt+"\n", args...)
-}
-
 func errorAt(pos int, msg string) {
 	log.Printf("%s", user_input)
 	space := ""
@@ -61,7 +59,7 @@ func Tokenize(src string) {
 	user_input = src
 	initTokens()
 	p := 0 // position in src
-	opList := []rune{'<', '>', '+', '-', '*', '/', '(', ')'}
+	opList := []rune{'=', ';', '<', '>', '+', '-', '*', '/', '(', ')'}
 	multiCharOpList := []struct {
 		ope string
 		tok int
@@ -79,6 +77,16 @@ loop:
 			p++
 			//fmt.Println("SPACE")
 			continue
+		}
+		// Identifier
+		if unicode.IsLower(r) {
+			pushTokens(Token{
+				ty:    TK_IDENT,
+				input: fmt.Sprintf("%c", r),
+				loc:   p,
+			})
+			p++
+			continue loop
 		}
 		// Tokenize Multi Character Operators
 		for _, op := range multiCharOpList {

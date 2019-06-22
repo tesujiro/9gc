@@ -16,15 +16,26 @@ func main() {
 
 	src := os.Args[1]
 	parser.Tokenize(src)
-	ast := parser.Parse()
+	parser.Parse()
 
+	// Init
 	fmt.Printf(".intel_syntax noprefix\n")
 	fmt.Printf(".global main\n")
 	fmt.Printf("main:\n")
 
-	vm.Gen(ast)
+	// Prologue: allocate 26 variables in stack
+	fmt.Printf("  push rbp\n")
+	fmt.Printf("  mov rbp, rsp\n")
+	fmt.Printf("  sub rsp, 208\n")
 
-	fmt.Printf("  pop rax\n")
+	for _, ast := range parser.Code {
+		vm.Gen(ast)
+		fmt.Printf("  pop rax\n")
+	}
+
+	// Epilogue: return last value in RAX
+	fmt.Printf("  mov rsp, rbp\n")
+	fmt.Printf("  pop rbp\n")
 	fmt.Printf("  ret\n")
 	return
 }

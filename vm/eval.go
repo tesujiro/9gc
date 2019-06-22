@@ -2,13 +2,42 @@ package vm
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/tesujiro/9gc/parser"
 )
 
+func errorPrint(fmt string, args ...interface{}) {
+	log.Fatalf(fmt+"\n", args...)
+}
+
+func genLval(node *parser.Node) {
+	if node.Ty != parser.ND_LVAR {
+		errorPrint("Left value is not a local variable.")
+	}
+	fmt.Printf("  mov rax, rbp\n")
+	fmt.Printf("  sub rax, %d\n", node.Offset)
+	fmt.Printf("  push rax\n")
+}
+
 func Gen(node *parser.Node) {
-	if node.Ty == parser.ND_NUM {
+	switch node.Ty {
+	case parser.ND_NUM:
 		fmt.Printf("  push %d\n", node.Val)
+		return
+	case parser.ND_LVAR:
+		genLval(node)
+		fmt.Printf("  pop rax\n")
+		fmt.Printf("  mov rax, [rax]\n")
+		fmt.Printf("  push rax\n")
+		return
+	case '=':
+		genLval(node.Lhs)
+		Gen(node.Rhs)
+		fmt.Printf("  pop rdi\n")
+		fmt.Printf("  pop rax\n")
+		fmt.Printf("  mov [rax], rdi\n")
+		fmt.Printf("  push rdi\n")
 		return
 	}
 	Gen(node.Lhs)

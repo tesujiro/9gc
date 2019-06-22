@@ -1,18 +1,22 @@
 package parser
 
 const (
-	ND_NUM = 256 + iota
+	ND_NUM  = 256 + iota
+	ND_LVAR // local variable
 	ND_EQ
 	ND_NE
 	ND_LE
 	ND_GE
 )
 
+var Code []*Node
+
 type Node struct {
-	Ty  int   // type of node
-	Lhs *Node // left-hand side
-	Rhs *Node // reft-hand side
-	Val int   // value when ty is ND_NUM
+	Ty     int   // type of node
+	Lhs    *Node // left-hand side
+	Rhs    *Node // reft-hand side
+	Val    int   // value when ty is ND_NUM
+	Offset int   // offset when ty is ND_LVAR
 }
 
 func newNode(ty int, lhs, rhs *Node) *Node {
@@ -31,12 +35,35 @@ func newNodeNum(val int) *Node {
 	}
 }
 
-func Parse() *Node {
-	return expr()
+func Parse() {
+	program()
+	return
+}
+
+func program() {
+	for !consume(TK_EOF) {
+		Code = append(Code, stmt())
+	}
+}
+
+func stmt() *Node {
+	node := expr()
+	if !consume(';') {
+		errorAt(pos, "the token is not ';'")
+	}
+	return node
 }
 
 func expr() *Node {
-	return equality()
+	return assign()
+}
+
+func assign() *Node {
+	node := equality()
+	if consume('=') {
+		node = newNode('=', node, assign())
+	}
+	return node
 }
 
 func equality() *Node {
@@ -117,7 +144,15 @@ func term() *Node {
 		}
 		return node
 	}
-
+	if tokens[pos].ty == TK_IDENT {
+		r := rune(tokens[pos].input[0])
+		n := Node{
+			Ty:     ND_LVAR,
+			Offset: int(r - 'a'),
+		}
+		pos++
+		return &n
+	}
 	if tokens[pos].ty == TK_NUM {
 		val := tokens[pos].val
 		pos++
