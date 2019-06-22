@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+
+	"github.com/tesujiro/9gc/parser"
+	"github.com/tesujiro/9gc/vm"
 )
 
 func main() {
@@ -11,15 +14,15 @@ func main() {
 		log.Fatalf("引数の個数が正しくありません\n")
 	}
 
-	user_input = os.Args[1]
-	tokenize()
-	node := expr()
+	src := os.Args[1]
+	parser.Tokenize(src)
+	ast := parser.Parse()
 
 	fmt.Printf(".intel_syntax noprefix\n")
 	fmt.Printf(".global main\n")
 	fmt.Printf("main:\n")
 
-	gen(node)
+	vm.Gen(ast)
 
 	fmt.Printf("  pop rax\n")
 	fmt.Printf("  ret\n")

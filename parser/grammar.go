@@ -1,4 +1,4 @@
-package main
+package parser
 
 const (
 	ND_NUM = 256 + iota
@@ -9,26 +9,30 @@ const (
 )
 
 type Node struct {
-	ty  int   // type of node
-	lhs *Node // left-hand side
-	rhs *Node // reft-hand side
-	val int   // value when ty is ND_NUM
+	Ty  int   // type of node
+	Lhs *Node // left-hand side
+	Rhs *Node // reft-hand side
+	Val int   // value when ty is ND_NUM
 }
 
 func newNode(ty int, lhs, rhs *Node) *Node {
 	return &Node{
-		ty:  ty,
-		lhs: lhs,
-		rhs: rhs,
+		Ty:  ty,
+		Lhs: lhs,
+		Rhs: rhs,
 	}
 }
 
 func newNodeNum(val int) *Node {
 	//fmt.Printf("newNodeNum(%v)\n", val)
 	return &Node{
-		ty:  ND_NUM,
-		val: val,
+		Ty:  ND_NUM,
+		Val: val,
 	}
+}
+
+func Parse() *Node {
+	return expr()
 }
 
 func expr() *Node {

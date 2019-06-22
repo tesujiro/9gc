@@ -1,4 +1,4 @@
-package main
+package parser
 
 import (
 	"log"
@@ -49,7 +49,8 @@ func errorAt(pos int, msg string) {
 	log.Fatalf("%s^ %s\n", space, msg)
 }
 
-func tokenize() {
+func Tokenize(src string) {
+	user_input = src
 	i := 0
 	p := 0
 	opList := []rune{'<', '>', '+', '-', '*', '/', '(', ')'}
@@ -71,6 +72,7 @@ loop:
 			//fmt.Println("SPACE")
 			continue
 		}
+		// Tokenize Multi Character Operators
 		for _, op := range multiCharOpList {
 			if p+len(op.ope) > len(user_input) {
 				continue
@@ -85,6 +87,7 @@ loop:
 				continue loop
 			}
 		}
+		// Tokenize Single Character Operators
 		for _, ch := range opList {
 			if r == ch {
 				tokens[i].ty = int(user_input[p])
@@ -95,6 +98,7 @@ loop:
 				continue loop
 			}
 		}
+		// Tokenize Numbers
 		if unicode.IsDigit(r) {
 			tokens[i].ty = TK_NUM
 			start := p

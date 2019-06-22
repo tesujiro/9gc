@@ -1,22 +1,26 @@
-package main
+package vm
 
-import "fmt"
+import (
+	"fmt"
 
-func gen(node *Node) {
-	if node.ty == ND_NUM {
-		fmt.Printf("  push %d\n", node.val)
+	"github.com/tesujiro/9gc/parser"
+)
+
+func Gen(node *parser.Node) {
+	if node.Ty == parser.ND_NUM {
+		fmt.Printf("  push %d\n", node.Val)
 		return
 	}
-	gen(node.lhs)
-	gen(node.rhs)
+	Gen(node.Lhs)
+	Gen(node.Rhs)
 	fmt.Printf("  pop rdi\n")
 	fmt.Printf("  pop rax\n")
-	switch node.ty {
-	case ND_EQ:
+	switch node.Ty {
+	case parser.ND_EQ:
 		fmt.Printf("  cmp rax, rdi\n")
 		fmt.Printf("  sete al\n")
 		fmt.Printf("  movzb rax,al\n")
-	case ND_NE:
+	case parser.ND_NE:
 		fmt.Printf("  cmp rax, rdi\n")
 		fmt.Printf("  setne al\n")
 		fmt.Printf("  movzb rax,al\n")
@@ -24,7 +28,7 @@ func gen(node *Node) {
 		fmt.Printf("  cmp rax, rdi\n")
 		fmt.Printf("  setl al\n")
 		fmt.Printf("  movzb rax,al\n")
-	case ND_LE:
+	case parser.ND_LE:
 		fmt.Printf("  cmp rax, rdi\n")
 		fmt.Printf("  setle al\n")
 		fmt.Printf("  movzb rax,al\n")
@@ -32,7 +36,7 @@ func gen(node *Node) {
 		fmt.Printf("  cmp rdi, rax\n")
 		fmt.Printf("  setl al\n")
 		fmt.Printf("  movzb rax,al\n")
-	case ND_GE:
+	case parser.ND_GE:
 		fmt.Printf("  cmp rdi, rax\n")
 		fmt.Printf("  setle al\n")
 		fmt.Printf("  movzb rax,al\n")
