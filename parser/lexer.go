@@ -24,9 +24,17 @@ type Token struct {
 
 var (
 	user_input string
-	tokens     [100]Token
+	tokens     []Token
 	pos        int
 )
+
+func initTokens() {
+	tokens = make([]Token, 0)
+}
+
+func pushTokens(t Token) {
+	tokens = append(tokens, t)
+}
 
 func consume(ty int) bool {
 	if tokens[pos].ty != ty {
@@ -51,8 +59,8 @@ func errorAt(pos int, msg string) {
 
 func Tokenize(src string) {
 	user_input = src
-	i := 0
-	p := 0
+	initTokens()
+	p := 0 // position in src
 	opList := []rune{'<', '>', '+', '-', '*', '/', '(', ')'}
 	multiCharOpList := []struct {
 		ope string
@@ -79,28 +87,31 @@ loop:
 			}
 			s := user_input[p : p+len(op.ope)]
 			if s == op.ope {
-				tokens[i].ty = op.tok
-				tokens[i].input = s
-				tokens[i].loc = p
-				i++
+				pushTokens(Token{
+					ty:    op.tok,
+					input: s,
+					loc:   p,
+				})
 				p += len(op.ope)
+				//fmt.Println("MULIT CHAR OP")
 				continue loop
 			}
 		}
 		// Tokenize Single Character Operators
 		for _, ch := range opList {
 			if r == ch {
-				tokens[i].ty = int(user_input[p])
-				tokens[i].input = user_input[p : p+1]
-				tokens[i].loc = p
-				i++
+				pushTokens(Token{
+					ty:    int(user_input[p]),
+					input: user_input[p : p+1],
+					loc:   p,
+				})
 				p++
+				//fmt.Println("SINGLE CHAR OP")
 				continue loop
 			}
 		}
 		// Tokenize Numbers
 		if unicode.IsDigit(r) {
-			tokens[i].ty = TK_NUM
 			start := p
 			p++
 			for p < len(user_input) && unicode.IsDigit(rune(user_input[p])) {
@@ -110,10 +121,12 @@ loop:
 			digit := user_input[start:stop]
 
 			d, _ := strconv.Atoi(digit)
-			tokens[i].input = digit
-			tokens[i].val = d
-			tokens[i].loc = p
-			i++
+			pushTokens(Token{
+				ty:    TK_NUM,
+				input: digit,
+				val:   d,
+				loc:   p,
+			})
 			//fmt.Println("DIGIT")
 			continue
 		}
@@ -140,8 +153,10 @@ loop:
 			}
 		*/
 	}
-	tokens[i].ty = TK_EOF
-	tokens[i].input = "EOF"
-	tokens[i].loc = p
-	//fmt.Println("EOF :", i)
+	pushTokens(Token{
+		ty:    TK_EOF,
+		input: "EOF",
+		loc:   p,
+	})
+	//fmt.Println("EOF :")
 }
