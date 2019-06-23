@@ -15,6 +15,7 @@ const (
 	TK_NE // !=
 	TK_LE // <=
 	TK_GE // >=
+	TK_RETURN
 )
 
 type Token struct {
@@ -60,6 +61,12 @@ func Tokenize(src string) {
 	initTokens()
 	p := 0 // position in src
 	opList := []rune{'=', ';', '<', '>', '+', '-', '*', '/', '(', ')'}
+	keywords := []struct {
+		ope string
+		tok int
+	}{
+		{"return", TK_RETURN},
+	}
 	multiCharOpList := []struct {
 		ope string
 		tok int
@@ -68,6 +75,12 @@ func Tokenize(src string) {
 		{"!=", TK_NE},
 		{"<=", TK_LE},
 		{">=", TK_GE},
+	}
+	isAlnum := func(r rune) bool {
+		return 'a' <= r && r <= 'z' ||
+			'A' <= r && r <= 'Z' ||
+			'0' <= r && r <= '9' ||
+			r == '_'
 	}
 
 loop:
@@ -78,15 +91,24 @@ loop:
 			//fmt.Println("SPACE")
 			continue
 		}
-		// Identifier
-		if unicode.IsLower(r) {
-			pushTokens(Token{
-				ty:    TK_IDENT,
-				input: fmt.Sprintf("%c", r),
-				loc:   p,
-			})
-			p++
-			continue loop
+		// Tokenize Keywords
+		for _, kw := range keywords {
+			next := p + len(kw.ope)
+			if next > len(user_input) {
+				continue
+			}
+			s := user_input[p:next]
+			if s == kw.ope &&
+				(next == len(user_input) || !isAlnum(rune(user_input[next]))) {
+				pushTokens(Token{
+					ty:    kw.tok,
+					input: s,
+					loc:   p,
+				})
+				p += len(kw.ope)
+				//fmt.Println("MULIT CHAR OP")
+				continue loop
+			}
 		}
 		// Tokenize Multi Character Operators
 		for _, op := range multiCharOpList {
@@ -117,6 +139,16 @@ loop:
 				//fmt.Println("SINGLE CHAR OP")
 				continue loop
 			}
+		}
+		// Identifier
+		if unicode.IsLower(r) {
+			pushTokens(Token{
+				ty:    TK_IDENT,
+				input: fmt.Sprintf("%c", r),
+				loc:   p,
+			})
+			p++
+			continue loop
 		}
 		// Tokenize Numbers
 		if unicode.IsDigit(r) {

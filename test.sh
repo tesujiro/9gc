@@ -9,7 +9,8 @@ try() {
   actual="$?"
 
   if [ "$actual" = "$expected" ]; then
-    echo "$input => $actual"
+    #echo "$input => $actual"
+    :
   else
     echo "$expected expected, but got $actual"
     echo "input: $input"
@@ -45,5 +46,11 @@ try 0 "-100>=0;"
 try 0 "i=0;"
 try 42 "x=42;"
 try 3 "a=1;b=2;c=3;"
+try 42 "return 42;"
+try 44 "return (+5-3)*22;"
+try 42 "i=42;return i;"
+try 5  "j=5;return j;"
+try 47 "i=42;j=5;k=i+j;return k;"
+try 63 "a=1;b=20;c=3;return (a+b)*c;"
 
 echo OK

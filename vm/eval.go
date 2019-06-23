@@ -39,6 +39,13 @@ func Gen(node *parser.Node) {
 		fmt.Printf("  mov [rax], rdi\n")
 		fmt.Printf("  push rdi\n")
 		return
+	case parser.ND_RETURN:
+		Gen(node.Lhs)
+		fmt.Printf("  pop rax\n")
+		fmt.Printf("  mov rsp, rbp\n")
+		fmt.Printf("  pop rbp\n")
+		fmt.Printf("  ret\n")
+		return
 	}
 	Gen(node.Lhs)
 	Gen(node.Rhs)

@@ -7,6 +7,7 @@ const (
 	ND_NE
 	ND_LE
 	ND_GE
+	ND_RETURN
 )
 
 var Code []*Node
@@ -47,9 +48,17 @@ func program() {
 }
 
 func stmt() *Node {
-	node := expr()
+	var node *Node
+	if consume(TK_RETURN) {
+		node = &Node{
+			Ty:  ND_RETURN,
+			Lhs: expr(),
+		}
+	} else {
+		node = expr()
+	}
 	if !consume(';') {
-		errorAt(pos, "the token is not ';'")
+		errorAt(tokens[pos].loc, "the token is not ';'")
 	}
 	return node
 }
@@ -148,7 +157,7 @@ func term() *Node {
 		r := rune(tokens[pos].input[0])
 		n := Node{
 			Ty:     ND_LVAR,
-			Offset: int(r - 'a'),
+			Offset: int(r-'a'+1) * 8,
 		}
 		pos++
 		return &n
