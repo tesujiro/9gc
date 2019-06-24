@@ -17,6 +17,7 @@ func genLval(node *parser.Node) {
 	}
 	fmt.Printf("  mov rax, rbp\n")
 	fmt.Printf("  sub rax, %d\n", node.Offset)
+
 	fmt.Printf("  push rax\n")
 }
 

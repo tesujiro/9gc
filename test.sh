@@ -52,5 +52,7 @@ try 42 "i=42;return i;"
 try 5  "j=5;return j;"
 try 47 "i=42;j=5;k=i+j;return k;"
 try 63 "a=1;b=20;c=3;return (a+b)*c;"
+try 12 "ab_123=3*4;return ab_123;"
+try 12 "var1=3;var2=4;return var1*var2;"
 
 echo OK

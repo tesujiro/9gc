@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"fmt"
 	"log"
 	"strconv"
 	"unicode"
@@ -20,8 +19,9 @@ const (
 
 type Token struct {
 	ty    int    // type of token
-	val   int    // value when ty is TK_NUM
-	input string // token string
+	val   int    // the value when ty is TK_NUM
+	name  string // the name when ty is TK_IDENT
+	input string // token string for error message
 	loc   int    // location
 }
 
@@ -142,12 +142,18 @@ loop:
 		}
 		// Identifier
 		if unicode.IsLower(r) {
+			start := p
+			for p < len(user_input) && isAlnum(rune(user_input[p])) {
+				p++
+			}
+			end := p
+			id := user_input[start:end]
 			pushTokens(Token{
 				ty:    TK_IDENT,
-				input: fmt.Sprintf("%c", r),
-				loc:   p,
+				name:  id,
+				input: id,
+				loc:   start,
 			})
-			p++
 			continue loop
 		}
 		// Tokenize Numbers

@@ -10,7 +10,16 @@ const (
 	ND_RETURN
 )
 
-var Code []*Node
+var (
+	Code     []*Node // AST
+	VarMap   *Map    // ENV
+	VarCount int     // ENV
+)
+
+func Init() {
+	VarMap = NewMap()
+	VarCount = 0
+}
 
 type Node struct {
 	Ty     int   // type of node
@@ -154,10 +163,21 @@ func term() *Node {
 		return node
 	}
 	if tokens[pos].ty == TK_IDENT {
-		r := rune(tokens[pos].input[0])
+		varname := tokens[pos].name
+		var varNo int
+
+		v := VarMap.Get(varname)
+		if v != nil {
+			varNo = (*v).(int)
+		} else {
+			varNo = VarCount
+			VarCount++
+			VarMap.Put(varname, varNo)
+		}
+
 		n := Node{
 			Ty:     ND_LVAR,
-			Offset: int(r-'a'+1) * 8,
+			Offset: (varNo + 1) * 8,
 		}
 		pos++
 		return &n

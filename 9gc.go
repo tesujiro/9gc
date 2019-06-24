@@ -14,6 +14,8 @@ func main() {
 		log.Fatalf("引数の個数が正しくありません\n")
 	}
 
+	parser.Init() // TODO: env
+
 	src := os.Args[1]
 	parser.Tokenize(src)
 	parser.Parse()
@@ -26,7 +28,7 @@ func main() {
 	// Prologue: allocate 26 variables in stack
 	fmt.Printf("  push rbp\n")
 	fmt.Printf("  mov rbp, rsp\n")
-	fmt.Printf("  sub rsp, 208\n")
+	fmt.Printf("  sub rsp, %d\n", (parser.VarCount+1)*8)
 
 	for _, ast := range parser.Code {
 		vm.Gen(ast)
