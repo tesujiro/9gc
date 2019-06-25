@@ -17,11 +17,11 @@ func (m *Map) Put(key string, val interface{}) {
 	m.vals = append(m.vals, val)
 }
 
-func (m *Map) Get(key string) *interface{} {
+func (m *Map) Get(key string) (interface{}, bool) {
 	for i := len(m.keys) - 1; i >= 0; i-- {
 		if m.keys[i] == key {
-			return &m.vals[i]
+			return m.vals[i], true
 		}
 	}
-	return nil
+	return nil, false
 }

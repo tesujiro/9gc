@@ -166,9 +166,8 @@ func term() *Node {
 		varname := tokens[pos].name
 		var varNo int
 
-		v := VarMap.Get(varname)
-		if v != nil {
-			varNo = (*v).(int)
+		if v, ok := VarMap.Get(varname); ok {
+			varNo = v.(int)
 		} else {
 			varNo = VarCount
 			VarCount++
