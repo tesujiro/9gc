@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/tesujiro/9gc/ast"
 	"github.com/tesujiro/9gc/parser"
 	"github.com/tesujiro/9gc/vm"
 )
@@ -14,7 +15,7 @@ func main() {
 		log.Fatalf("引数の個数が正しくありません\n")
 	}
 
-	parser.Init() // TODO: env
+	ast.Init() // TODO: env
 
 	src := os.Args[1]
 	parser.Tokenize(src)
@@ -28,9 +29,9 @@ func main() {
 	// Prologue: allocate 26 variables in stack
 	fmt.Printf("  push rbp\n")
 	fmt.Printf("  mov rbp, rsp\n")
-	fmt.Printf("  sub rsp, %d\n", (parser.VarCount+1)*8)
+	fmt.Printf("  sub rsp, %d\n", (ast.VarCount+1)*8)
 
-	for _, ast := range parser.Code {
+	for _, ast := range ast.Code {
 		vm.Gen(ast)
 		fmt.Printf("  pop rax\n")
 	}

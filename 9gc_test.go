@@ -3,7 +3,7 @@ package main
 import (
 	"testing"
 
-	"github.com/tesujiro/9gc/parser"
+	"github.com/tesujiro/9gc/ast"
 )
 
 /*
@@ -19,7 +19,7 @@ func expect(t *testing.T, expected, actual interface{}, ok bool) {
 */
 
 func TestMap(t *testing.T) {
-	m := parser.NewMap()
+	m := ast.NewMap()
 	if _, ok := m.Get("foo"); ok {
 		t.Fatalf("Map.Get test error: expected not ok got ok\n")
 	}

@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/tesujiro/9gc/parser"
+	"github.com/tesujiro/9gc/ast"
 )
 
 func errorPrint(fmt string, args ...interface{}) {
 	log.Fatalf(fmt+"\n", args...)
 }
 
-func genLval(node *parser.Node) {
-	if node.Ty != parser.ND_LVAR {
+func genLval(node *ast.Node) {
+	if node.Ty != ast.ND_LVAR {
 		errorPrint("Left value is not a local variable.")
 	}
 	fmt.Printf("  mov rax, rbp\n")
@@ -21,12 +21,12 @@ func genLval(node *parser.Node) {
 	fmt.Printf("  push rax\n")
 }
 
-func Gen(node *parser.Node) {
+func Gen(node *ast.Node) {
 	switch node.Ty {
-	case parser.ND_NUM:
+	case ast.ND_NUM:
 		fmt.Printf("  push %d\n", node.Val)
 		return
-	case parser.ND_LVAR:
+	case ast.ND_LVAR:
 		genLval(node)
 		fmt.Printf("  pop rax\n")
 		fmt.Printf("  mov rax, [rax]\n")
@@ -40,7 +40,7 @@ func Gen(node *parser.Node) {
 		fmt.Printf("  mov [rax], rdi\n")
 		fmt.Printf("  push rdi\n")
 		return
-	case parser.ND_RETURN:
+	case ast.ND_RETURN:
 		Gen(node.Lhs)
 		fmt.Printf("  pop rax\n")
 		fmt.Printf("  mov rsp, rbp\n")
@@ -53,11 +53,11 @@ func Gen(node *parser.Node) {
 	fmt.Printf("  pop rdi\n")
 	fmt.Printf("  pop rax\n")
 	switch node.Ty {
-	case parser.ND_EQ:
+	case ast.ND_EQ:
 		fmt.Printf("  cmp rax, rdi\n")
 		fmt.Printf("  sete al\n")
 		fmt.Printf("  movzb rax,al\n")
-	case parser.ND_NE:
+	case ast.ND_NE:
 		fmt.Printf("  cmp rax, rdi\n")
 		fmt.Printf("  setne al\n")
 		fmt.Printf("  movzb rax,al\n")
@@ -65,7 +65,7 @@ func Gen(node *parser.Node) {
 		fmt.Printf("  cmp rax, rdi\n")
 		fmt.Printf("  setl al\n")
 		fmt.Printf("  movzb rax,al\n")
-	case parser.ND_LE:
+	case ast.ND_LE:
 		fmt.Printf("  cmp rax, rdi\n")
 		fmt.Printf("  setle al\n")
 		fmt.Printf("  movzb rax,al\n")
@@ -73,7 +73,7 @@ func Gen(node *parser.Node) {
 		fmt.Printf("  cmp rdi, rax\n")
 		fmt.Printf("  setl al\n")
 		fmt.Printf("  movzb rax,al\n")
-	case parser.ND_GE:
+	case ast.ND_GE:
 		fmt.Printf("  cmp rdi, rax\n")
 		fmt.Printf("  setle al\n")
 		fmt.Printf("  movzb rax,al\n")

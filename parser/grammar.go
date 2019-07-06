@@ -1,49 +1,6 @@
 package parser
 
-const (
-	ND_NUM  = 256 + iota
-	ND_LVAR // local variable
-	ND_EQ
-	ND_NE
-	ND_LE
-	ND_GE
-	ND_RETURN
-)
-
-var (
-	Code     []*Node // AST
-	VarMap   *Map    // ENV
-	VarCount int     // ENV
-)
-
-func Init() {
-	VarMap = NewMap()
-	VarCount = 0
-}
-
-type Node struct {
-	Ty     int   // type of node
-	Lhs    *Node // left-hand side
-	Rhs    *Node // reft-hand side
-	Val    int   // value when ty is ND_NUM
-	Offset int   // offset when ty is ND_LVAR
-}
-
-func newNode(ty int, lhs, rhs *Node) *Node {
-	return &Node{
-		Ty:  ty,
-		Lhs: lhs,
-		Rhs: rhs,
-	}
-}
-
-func newNodeNum(val int) *Node {
-	//fmt.Printf("newNodeNum(%v)\n", val)
-	return &Node{
-		Ty:  ND_NUM,
-		Val: val,
-	}
-}
+import "github.com/tesujiro/9gc/ast"
 
 func Parse() {
 	program()
@@ -52,15 +9,15 @@ func Parse() {
 
 func program() {
 	for !consume(TK_EOF) {
-		Code = append(Code, stmt())
+		ast.Code = append(ast.Code, stmt())
 	}
 }
 
-func stmt() *Node {
-	var node *Node
+func stmt() *ast.Node {
+	var node *ast.Node
 	if consume(TK_RETURN) {
-		node = &Node{
-			Ty:  ND_RETURN,
+		node = &ast.Node{
+			Ty:  ast.ND_RETURN,
 			Lhs: expr(),
 		}
 	} else {
@@ -72,88 +29,88 @@ func stmt() *Node {
 	return node
 }
 
-func expr() *Node {
+func expr() *ast.Node {
 	return assign()
 }
 
-func assign() *Node {
+func assign() *ast.Node {
 	node := equality()
 	if consume('=') {
-		node = newNode('=', node, assign())
+		node = ast.NewNode('=', node, assign())
 	}
 	return node
 }
 
-func equality() *Node {
+func equality() *ast.Node {
 	node := relational()
 	for {
 		if consume(TK_EQ) {
-			node = newNode(ND_EQ, node, relational())
+			node = ast.NewNode(ast.ND_EQ, node, relational())
 		} else if consume(TK_NE) {
-			node = newNode(ND_NE, node, relational())
+			node = ast.NewNode(ast.ND_NE, node, relational())
 		} else {
 			return node
 		}
 	}
 }
 
-func relational() *Node {
+func relational() *ast.Node {
 	node := add()
 	for {
 		switch {
 		case consume('<'):
-			node = newNode('<', node, add())
+			node = ast.NewNode('<', node, add())
 		case consume(TK_LE):
-			node = newNode(ND_LE, node, add())
+			node = ast.NewNode(ast.ND_LE, node, add())
 		case consume('>'):
-			node = newNode('>', node, add())
+			node = ast.NewNode('>', node, add())
 		case consume(TK_GE):
-			node = newNode(ND_GE, node, add())
+			node = ast.NewNode(ast.ND_GE, node, add())
 		default:
 			return node
 		}
 	}
 }
 
-func add() *Node {
+func add() *ast.Node {
 	//fmt.Println("expr")
 	node := mul()
 	for {
 		if consume('+') {
-			node = newNode('+', node, mul())
+			node = ast.NewNode('+', node, mul())
 		} else if consume('-') {
-			node = newNode('-', node, mul())
+			node = ast.NewNode('-', node, mul())
 		} else {
 			return node
 		}
 	}
 }
 
-func mul() *Node {
+func mul() *ast.Node {
 	//fmt.Println("mul")
 	node := unary()
 	for {
 		if consume('*') {
-			node = newNode('*', node, unary())
+			node = ast.NewNode('*', node, unary())
 		} else if consume('/') {
-			node = newNode('/', node, unary())
+			node = ast.NewNode('/', node, unary())
 		} else {
 			return node
 		}
 	}
 }
 
-func unary() *Node {
+func unary() *ast.Node {
 	if consume('+') {
 		return term()
 	} else if consume('-') {
-		return newNode('-', newNodeNum(0), term())
+		return ast.NewNode('-', ast.NewNodeNum(0), term())
 	} else {
 		return term()
 	}
 }
 
-func term() *Node {
+func term() *ast.Node {
 	//fmt.Println("term")
 	if consume('(') {
 		node := expr()
@@ -166,16 +123,16 @@ func term() *Node {
 		varname := tokens[pos].name
 		var varNo int
 
-		if v, ok := VarMap.Get(varname); ok {
+		if v, ok := ast.VarMap.Get(varname); ok {
 			varNo = v.(int)
 		} else {
-			varNo = VarCount
-			VarCount++
-			VarMap.Put(varname, varNo)
+			varNo = ast.VarCount
+			ast.VarCount++
+			ast.VarMap.Put(varname, varNo)
 		}
 
-		n := Node{
-			Ty:     ND_LVAR,
+		n := ast.Node{
+			Ty:     ast.ND_LVAR,
 			Offset: (varNo + 1) * 8,
 		}
 		pos++
@@ -184,7 +141,7 @@ func term() *Node {
 	if tokens[pos].ty == TK_NUM {
 		val := tokens[pos].val
 		pos++
-		return newNodeNum(val)
+		return ast.NewNodeNum(val)
 	}
 	errorAt(pos, "not number nor parenthesis")
 	return nil
